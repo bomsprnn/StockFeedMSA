@@ -1,0 +1,4 @@
+rootProject.name = 'MSAStockFeed'
+include 'user-module'
+include 'newsfeed-module'
+include 'activity-module'
