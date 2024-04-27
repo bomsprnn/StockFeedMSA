@@ -5,6 +5,7 @@ import com.example.activitymodule.Domain.CommentLike;
 import com.example.activitymodule.Dto.CreateCommentDto;
 import com.example.activitymodule.Repository.CommentLikeRepository;
 import com.example.activitymodule.Repository.CommentRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -20,12 +21,13 @@ public class CommentService {
     private final PostService postService;
     private final CommentLikeRepository commentLikeRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
+    private final JWTParseService jwtParseService;
 
     // 댓글 생성
-    public void createComment(CreateCommentDto createCommentDto) {
-        //User user = userService.getUser(userService.getCurrentUser());
+    public void createComment(HttpServletRequest request, CreateCommentDto createCommentDto) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         Comment comment = Comment.builder()
-                .userId(createCommentDto.getUserId())
+                .userId(userId)
                 .content(createCommentDto.getContent())
                 .post(postService.getPostById(createCommentDto.getPostId()))
                 .build();

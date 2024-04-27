@@ -9,7 +9,9 @@ import com.example.activitymodule.Dto.ViewPostDto;
 import com.example.activitymodule.Repository.CommentLikeRepository;
 import com.example.activitymodule.Repository.PostLikeRepository;
 import com.example.activitymodule.Repository.PostRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,19 +22,23 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
     private final UserServiceClient userServiceClient;
+    private final JWTParseService jwtParseService;
 
     // 게시글 생성
-    public void createPost(CreatePostDto createPostDto) {
+    public void createPost(HttpServletRequest request, CreatePostDto createPostDto) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
+        log.info("userId: {}", userId);
         Post post = Post.builder()
                 .title(createPostDto.getTitle())
                 .content(createPostDto.getContent())
-                .userId(createPostDto.getUserId())
+                .userId(userId)
                 .viewCount(0)
                 .build();
         postRepository.save(post);

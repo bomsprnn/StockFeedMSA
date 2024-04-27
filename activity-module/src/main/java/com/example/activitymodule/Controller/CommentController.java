@@ -3,6 +3,7 @@ package com.example.activitymodule.Controller;
 import com.example.activitymodule.Dto.CommentDto;
 import com.example.activitymodule.Dto.CreateCommentDto;
 import com.example.activitymodule.Service.CommentService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/post/comment") // 기본 경로
+@RequestMapping("activity/post/comment") // 기본 경로
 public class CommentController {
     private final CommentService commentService;
 
@@ -23,8 +24,8 @@ public class CommentController {
      * 댓글 작성
      */
     @PostMapping("/create")
-    public ResponseEntity<String> createComment(@RequestBody CreateCommentDto createCommentDto) {
-        commentService.createComment(createCommentDto);
+    public ResponseEntity<String> createComment(HttpServletRequest request, @RequestBody CreateCommentDto createCommentDto) {
+        commentService.createComment(request, createCommentDto);
         return ResponseEntity.ok().body("댓글 작성 완료.");
     }
 

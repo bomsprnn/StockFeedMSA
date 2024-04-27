@@ -4,6 +4,7 @@ import com.example.activitymodule.Dto.CreatePostDto;
 import com.example.activitymodule.Dto.ViewPostDto;
 import com.example.activitymodule.Dto.postReqDto;
 import com.example.activitymodule.Service.PostService;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/post") // 기본 경로
+@RequestMapping("/activity/post") // 기본 경로
 public class PostController {
     private final PostService postService;
 
@@ -20,8 +21,9 @@ public class PostController {
      * 포스트 작성
      */
     @PostMapping("/create")
-    public ResponseEntity<String> createPost(@RequestBody CreatePostDto createPostDto) {
-        postService.createPost(createPostDto);
+    public ResponseEntity<String> createPost(HttpServletRequest request, @RequestBody CreatePostDto createPostDto) {
+        log.info("createPostDto: {}", createPostDto);
+        postService.createPost(request, createPostDto);
         return ResponseEntity.ok("포스트 작성 완료.");
     }
 
