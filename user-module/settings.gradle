@@ -1,0 +1,4 @@
+rootProject.name = 'user-module'
+include 'user-service'
+include 'newsfeed-service'
+include 'activity-service'
