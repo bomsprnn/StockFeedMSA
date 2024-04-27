@@ -27,7 +27,7 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
     private final Key key;
 
 
-    public TokenValidationFilter(RedisTemplate<String, String> redisTemplate, @Value("${jwt.secret}") String secretKey){
+    public TokenValidationFilter(RedisTemplate<String, String> redisTemplate, @Value("${jwt.secret}") String secretKey) {
         this.redisTemplate = redisTemplate;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -56,11 +56,12 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
         String lastLogout = redisTemplate.opsForValue().get("lastLogout:" + username);
 
         //모든 기기에서 로그아웃
-        if(exchange.getRequest().getPath().toString().equals("/user/logoutall")){
-            redisTemplate.opsForValue().set(token, "blacklisted");
+        if (exchange.getRequest().getPath().toString().equals("/user/logoutall")) {
+            //redisTemplate.opsForValue().set(token, "blacklisted");
             redisTemplate.opsForValue().set("lastLogout:" + username, String.valueOf(System.currentTimeMillis()));
             return chain.filter(exchange);
         }
+
         // 마지막 로그아웃 시간과 토큰 생성 시간 비교
         if (lastLogout != null) {
             long lastLogoutTime = Long.parseLong(lastLogout);
@@ -68,6 +69,8 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
             Date issuedAt = claims.getIssuedAt();
             if (issuedAt.getTime() < lastLogoutTime) {
                 exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                log.info("lastLogoutTime: " + lastLogoutTime);
+                log.info("issuedAt: " + issuedAt.getTime());
                 return exchange.getResponse().setComplete();
             }
         }
