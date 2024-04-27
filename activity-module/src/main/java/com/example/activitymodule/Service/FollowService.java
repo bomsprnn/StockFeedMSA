@@ -2,6 +2,7 @@ package com.example.activitymodule.Service;
 
 import com.example.activitymodule.Domain.Follow;
 import com.example.activitymodule.Repository.FollowRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
@@ -18,11 +19,11 @@ import java.util.List;
 public class FollowService {
     private final FollowRepository followRepository;
     private final ApplicationEventPublisher applicationEventPublisher;
-
+    private final JWTParseService jwtParseService;
 
     // 팔로우
-    public void follow(Long followerId, Long followeeId) {
-
+    public void follow(Long followeeId, HttpServletRequest request) {
+        Long followerId = jwtParseService.getUserIdFromToken(request);
         if (followerId.equals(followeeId)) {
             throw new IllegalArgumentException("자기 자신을 팔로우할 수 없습니다.");
         }
@@ -39,8 +40,8 @@ public class FollowService {
     }
 
     // 언팔로우
-    public void unfollow(Long unfollowerId, Long unfolloweeId) {
-
+    public void unfollow(Long unfolloweeId, HttpServletRequest request) {
+        Long unfollowerId = jwtParseService.getUserIdFromToken(request);
         if (unfollowerId.equals(unfolloweeId)) {
             throw new IllegalArgumentException("자기 자신을 언팔로우할 수 없습니다.");
         }
@@ -53,7 +54,8 @@ public class FollowService {
     }
 
     // 팔로우 여부 확인
-    public boolean isFollowing(Long followerId, Long followeeId) {
+    public boolean isFollowing(HttpServletRequest request, Long followeeId) {
+        Long followerId = jwtParseService.getUserIdFromToken(request);
         return followRepository.findByFollowerIdAndFollowingId(followerId, followeeId).isPresent();
     }
 
@@ -68,7 +70,8 @@ public class FollowService {
     }
 
     // 팔로워 목록 반환
-    public List<Long> getFollowers(Long userId) {
+    public List<Long> getFollowers(HttpServletRequest request) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         List<Follow> followList = followRepository.findByFollowingId(userId);
         List<Long> followersId = new ArrayList<>();
         for (Follow follow : followList) {
@@ -78,7 +81,8 @@ public class FollowService {
     }
 
     // 팔로잉 목록 반환
-    public List<Long> getFollowings(Long userId) {
+    public List<Long> getFollowings(HttpServletRequest request) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         List<Follow> followList = followRepository.findByFollowerId(userId);
         List<Long> followingsId = new ArrayList<>();
         for (Follow follow : followList) {

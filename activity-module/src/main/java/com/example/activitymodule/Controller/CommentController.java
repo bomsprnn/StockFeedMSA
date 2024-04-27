@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("activity/post/comment") // 기본 경로
+@RequestMapping("/activity/post/comment") // 기본 경로
 public class CommentController {
     private final CommentService commentService;
 
