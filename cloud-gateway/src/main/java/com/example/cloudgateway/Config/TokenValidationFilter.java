@@ -1,5 +1,11 @@
 package com.example.cloudgateway.Config;
 
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -10,12 +16,21 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.security.Key;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
 @Component
 public class TokenValidationFilter implements GlobalFilter, Ordered {
     private final RedisTemplate<String, String> redisTemplate;
+    private final Key key;
 
-    public TokenValidationFilter(RedisTemplate<String, String> redisTemplate) {
+
+    public TokenValidationFilter(RedisTemplate<String, String> redisTemplate, @Value("${jwt.secret}") String secretKey){
         this.redisTemplate = redisTemplate;
+        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     @Override
@@ -33,15 +48,23 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             token = authorizationHeader.substring(7); // "Bearer " 이후의 토큰 추출
         }
-//        if (token == null || redisTemplate.hasKey(token)) {
-//            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-//
-//            return exchange.getResponse().setComplete();
-//        }
+        if (token == null || redisTemplate.hasKey(token)) {
+            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+            log.info("로그아웃 필터");
+            return exchange.getResponse().setComplete();
+        }
 
         // 로그아웃 요청 처리
         if (token != null || exchange.getRequest().getMethod() == HttpMethod.POST && exchange.getRequest().getPath().toString().equals("/user/logout")) {
-            redisTemplate.opsForValue().set(token, "blacklisted");
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            Date expiration = claims.getExpiration();
+            log.info("expiration: " + expiration);
+            long remainingTime = expiration.getTime() - System.currentTimeMillis(); // 남은 유효기간 계산
+            log.info("remainingTime: " + remainingTime);
+            // Redis에 토큰 저장 시, 남은 유효기간을 설정
+            if (remainingTime > 0) {
+                redisTemplate.opsForValue().set(token, "blacklisted", remainingTime, TimeUnit.MILLISECONDS);
+            }
         }
 
         return chain.filter(exchange);
