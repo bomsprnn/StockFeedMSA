@@ -46,7 +46,8 @@ public class PostService {
     }
 
     // 게시글 수정
-    public void updatePost(Long postId, CreatePostDto createPostDto) {
+    public void updatePost(HttpServletRequest request, Long postId, CreatePostDto createPostDto) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         Post post = checkAndGetPost(postId, createPostDto.getUserId());
         //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.DELETE));
         post.update(createPostDto.getTitle(), createPostDto.getContent());
@@ -54,8 +55,9 @@ public class PostService {
     }
 
     // 게시글 삭제
-    public void deletePost(Long postId, Long userId) {
-        Post post = checkAndGetPost(postId, userId);
+    public void deletePost(HttpServletRequest request, Long postId) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
+        Post post = checkAndGetPost(userId, postId);
         postRepository.delete(post);
         //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.DELETE));
     }
@@ -76,7 +78,8 @@ public class PostService {
     }
 
     // 게시글 상세 조회
-    public ViewPostDto viewPost(Long postId, Long userId) {
+    public ViewPostDto viewPost(HttpServletRequest request, Long postId) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         Post post = getPostById(postId);
         post.addViewCount(); // 조회수 증가
         List<CommentDto> commentDtos = fetchCommentsForPost(post, userId);
@@ -96,9 +99,9 @@ public class PostService {
     }
 
     // 포스트 좋아요
-    public void likePost(Long postId, Long userId) {
+    public void likePost(HttpServletRequest request, Long postId) {
         Post post = getPostById(postId);
-
+        Long userId = jwtParseService.getUserIdFromToken(request);
         if (postLikeRepository.existsByUserIdAndPost(userId, post)) {
             throw new IllegalArgumentException("이미 좋아요를 누른 게시글입니다.");
         }
@@ -111,9 +114,9 @@ public class PostService {
     }
 
     // 포스트 좋아요 취소
-    public void unlikePost(Long postId, Long userId) {
+    public void unlikePost(HttpServletRequest request, Long postId) {
         Post post = getPostById(postId);
-
+        Long userId = jwtParseService.getUserIdFromToken(request);
         if (!postLikeRepository.existsByUserIdAndPost(userId, post)) {
             throw new IllegalArgumentException("좋아요를 누르지 않은 게시글입니다.");
         }
