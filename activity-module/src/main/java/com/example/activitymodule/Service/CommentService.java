@@ -37,7 +37,8 @@ public class CommentService {
     }
 
     // 댓글 삭제
-    public void deleteComment(Long commentId, Long userId) {
+    public void deleteComment(HttpServletRequest request, Long commentId) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         Comment comment = commentRepository.findById(commentId).orElseThrow(
                 () -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
 
@@ -49,7 +50,8 @@ public class CommentService {
     }
 
     // 댓글 좋아요
-    public void likeComment(Long commentId, Long userId) {
+    public void likeComment(HttpServletRequest request, Long commentId) {
+        Long userId = jwtParseService.getUserIdFromToken(request);
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 댓글이 존재하지 않습니다."));
         if(commentLikeRepository.existsByUserIdAndComment(userId, comment)){

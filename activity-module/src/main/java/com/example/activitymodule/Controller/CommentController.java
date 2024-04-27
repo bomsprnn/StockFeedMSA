@@ -29,27 +29,27 @@ public class CommentController {
         return ResponseEntity.ok().body("댓글 작성 완료.");
     }
 
-//    /**
-//     * 댓글 삭제
-//     */
-//    @DeleteMapping("/delete")
-//    public ResponseEntity<String> deleteComment(@RequestBody CommentDto commentId) {
-//        commentService.deleteComment(commentId.getId());
-//        return ResponseEntity.ok().body("댓글 삭제 완료.");
-//    }
-//
-//    /**
-//     * 댓글 좋아요
-//     */
-//    @PostMapping("/like")
-//    public ResponseEntity<String> likeComment(@RequestBody CommentDto commentId) {
-//        commentService.likeComment(commentId.getId());
-//        return ResponseEntity.ok().body("댓글 좋아요 완료.");
-//    }
-//
-//
-//    @ExceptionHandler(IllegalArgumentException.class)
-//    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
-//        return ResponseEntity.badRequest().body(e.getMessage());
-//    }
+    /**
+     * 댓글 삭제
+     */
+    @DeleteMapping("/delete")
+    public ResponseEntity<String> deleteComment(HttpServletRequest request, @RequestBody CommentDto commentId) {
+        commentService.deleteComment(request, commentId.getId());
+        return ResponseEntity.ok().body("댓글 삭제 완료.");
+    }
+
+    /**
+     * 댓글 좋아요
+     */
+    @PostMapping("/like")
+    public ResponseEntity<String> likeComment(HttpServletRequest request, @RequestBody CommentDto commentId) {
+        commentService.likeComment(request, commentId.getId());
+        return ResponseEntity.ok().body("댓글 좋아요 완료.");
+    }
+
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleIllegalArgumentException(IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    }
 }
