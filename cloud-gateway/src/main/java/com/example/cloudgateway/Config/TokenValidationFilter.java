@@ -35,14 +35,13 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        if (exchange.getRequest().getPath().toString().equals("/user/signup") || exchange.getRequest().getPath().toString().equals("/user/signup/confirm")) {
+        if (exchange.getRequest().getPath().toString().equals("/user/signup") ||
+                exchange.getRequest().getPath().toString().equals("/user/signup/confirm") ||
+                exchange.getRequest().getPath().toString().equals("/user/login")) {
             // 회원가입 요청은 바로 통과시킨다.
             return chain.filter(exchange);
         }
-        if (exchange.getRequest().getPath().toString().equals("/user/login")) {
-            // 회원가입 요청은 바로 통과시킨다.
-            return chain.filter(exchange);
-        }
+
         String authorizationHeader = exchange.getRequest().getHeaders().getFirst("Authorization");
         String token = null;
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
@@ -50,12 +49,31 @@ public class TokenValidationFilter implements GlobalFilter, Ordered {
         }
         if (token == null || redisTemplate.hasKey(token)) {
             exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
-            log.info("로그아웃 필터");
             return exchange.getResponse().setComplete();
         }
 
-        // 로그아웃 요청 처리
-        if (token != null || exchange.getRequest().getMethod() == HttpMethod.POST && exchange.getRequest().getPath().toString().equals("/user/logout")) {
+        String username = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody().getSubject();
+        String lastLogout = redisTemplate.opsForValue().get("lastLogout:" + username);
+
+        //모든 기기에서 로그아웃
+        if(exchange.getRequest().getPath().toString().equals("/user/logoutall")){
+            redisTemplate.opsForValue().set(token, "blacklisted");
+            redisTemplate.opsForValue().set("lastLogout:" + username, String.valueOf(System.currentTimeMillis()));
+            return chain.filter(exchange);
+        }
+        // 마지막 로그아웃 시간과 토큰 생성 시간 비교
+        if (lastLogout != null) {
+            long lastLogoutTime = Long.parseLong(lastLogout);
+            Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+            Date issuedAt = claims.getIssuedAt();
+            if (issuedAt.getTime() < lastLogoutTime) {
+                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                return exchange.getResponse().setComplete();
+            }
+        }
+
+        //로그아웃
+        if (exchange.getRequest().getMethod() == HttpMethod.POST && exchange.getRequest().getPath().toString().equals("/user/logout")) {
             Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
             Date expiration = claims.getExpiration();
             log.info("expiration: " + expiration);
