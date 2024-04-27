@@ -80,12 +80,15 @@ public class PostService {
     // 게시글 상세 조회
     public ViewPostDto viewPost(HttpServletRequest request, Long postId) {
         Long userId = jwtParseService.getUserIdFromToken(request);
+        log.info("사용자 아이디 userId: {}", userId);
+        String username = jwtParseService.getUsernameFromToken(request);
+        log.info("사용자 이메일 username: {}", username);
         Post post = getPostById(postId);
         post.addViewCount(); // 조회수 증가
         List<CommentDto> commentDtos = fetchCommentsForPost(post, userId);
         int like = postLikeRepository.countByPost(post);
         boolean isLiked = postLikeRepository.existsByUserIdAndPost(userId, post);
-        String username = userServiceClient.getUser(post.getUserId()).getName();
+        //String username = userServiceClient.getUser(post.getUserId()).getName();
         return ViewPostDto.builder()
                 .comments(commentDtos)
                 .title(post.getTitle())

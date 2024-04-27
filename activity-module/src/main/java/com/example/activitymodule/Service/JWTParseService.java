@@ -25,7 +25,8 @@ public class JWTParseService {
         return claims.get("userId", Long.class); // 토큰에서 사용자의 PK값을 얻음
     }
 
-    public String getUsernameFromToken(String token) {
+    public String getUsernameFromToken(HttpServletRequest request) {
+        String token = resolveToken(request);
         Claims claims = parseClaims(token);
         return claims.getSubject(); // 토큰에서 사용자의 이메일을 얻음
     }
