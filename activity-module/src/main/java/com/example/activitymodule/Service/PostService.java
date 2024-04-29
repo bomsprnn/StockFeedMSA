@@ -49,9 +49,9 @@ public class PostService {
     public void updatePost(HttpServletRequest request, Long postId, CreatePostDto createPostDto) {
         Long userId = jwtParseService.getUserIdFromToken(request);
         Post post = checkAndGetPost(postId, createPostDto.getUserId());
-        //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.DELETE));
+        newsFeedService.deletePostonNewsFeed(post.getUserId(), post.getId());
         post.update(createPostDto.getTitle(), createPostDto.getContent());
-        //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.CREATE));
+        newsFeedService.createPostonNewsFeed(userId, post.getUserId(), post.getId());
     }
 
     // 게시글 삭제
@@ -59,7 +59,7 @@ public class PostService {
         Long userId = jwtParseService.getUserIdFromToken(request);
         Post post = checkAndGetPost(userId, postId);
         postRepository.delete(post);
-        //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.DELETE));
+        newsFeedService.deletePostonNewsFeed(post.getUserId(), post.getId());
     }
 
     // 게시글 조회및 권한 체크
@@ -113,7 +113,7 @@ public class PostService {
                 .post(post)
                 .build();
         postLikeRepository.save(postLike);
-        //applicationEventPublisher.publishEvent(new PostLikeEvent(this, postLike,null, null,PostLikeEvent.EventType.CREATE));
+        newsFeedService.createPostLikeonNewsFeed(userId, post.getUserId(), post.getId());
     }
 
     // 포스트 좋아요 취소
@@ -124,7 +124,7 @@ public class PostService {
             throw new IllegalArgumentException("좋아요를 누르지 않은 게시글입니다.");
         }
         postLikeRepository.deleteByUserIdAndPost(userId, post);
-        //applicationEventPublisher.publishEvent(new PostLikeEvent(this, null, post, user, PostLikeEvent.EventType.DELETE));
+        newsFeedService.deletePostLikeonNewsFeed(userId, post.getId());
     }
 
     // 포스트 댓글 가져오기

@@ -95,10 +95,34 @@ public class NewsFeedService {
         });
     }
 
-    public void deletePostonNewsFeed(Long userId, Long ownerId, Long postId) {
-        NewsFeedDto newsFeed = createNewsFeed(userId, ownerId, "POST", null, postId, null);
+    public void deletePostonNewsFeed(Long ownerId, Long postId) {
+        NewsFeedDto newsFeed = createNewsFeed(null, ownerId, "POST", null, postId, null);
         kafkaNewsFeedProducer.sendDeleteNewsFeedMessage(newsFeed);
         log.info("Post NewsFeed Deleted");
+    }
+
+    public void deleteCommentonNewsFeed(Long ownerId, Long commentId) {
+        NewsFeedDto newsFeed = createNewsFeed(null, ownerId, "COMMENT", null, null, commentId);
+        kafkaNewsFeedProducer.sendDeleteNewsFeedMessage(newsFeed);
+        log.info("Comment NewsFeed Deleted");
+    }
+
+    public void deleteFollowonNewsFeed(Long ownerId, Long followUserId) {
+        NewsFeedDto newsFeed = createNewsFeed(null, ownerId, "FOLLOW", followUserId, null, null);
+        kafkaNewsFeedProducer.sendDeleteNewsFeedMessage(newsFeed);
+        log.info("Follow NewsFeed Deleted");
+    }
+
+    public void deleteCommentLikeonNewsFeed(Long ownerId, Long commentId) {
+        NewsFeedDto newsFeed = createNewsFeed(null, ownerId, "COMMENTLIKE", null, null, commentId);
+        kafkaNewsFeedProducer.sendDeleteNewsFeedMessage(newsFeed);
+        log.info("CommentLike NewsFeed Deleted");
+    }
+
+    public void deletePostLikeonNewsFeed(Long ownerId, Long postId) {
+        NewsFeedDto newsFeed = createNewsFeed(null, ownerId, "POSTLIKE", null, postId, null);
+        kafkaNewsFeedProducer.sendDeleteNewsFeedMessage(newsFeed);
+        log.info("PostLike NewsFeed Deleted");
     }
 
 
