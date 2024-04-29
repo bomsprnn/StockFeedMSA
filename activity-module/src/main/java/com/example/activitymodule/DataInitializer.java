@@ -2,6 +2,7 @@ package com.example.activitymodule;
 
 
 import com.example.activitymodule.Domain.Comment;
+import com.example.activitymodule.Domain.Follow;
 import com.example.activitymodule.Domain.Post;
 import com.example.activitymodule.Repository.CommentRepository;
 import com.example.activitymodule.Repository.FollowRepository;
@@ -49,7 +50,21 @@ public class DataInitializer {
         commentRepository.save(comment);
         commentRepository.save(comment2);
 
-
+        Follow follow = Follow.builder()
+                .followerId(1L)
+                .followingId(2L)
+                .build();
+        Follow follow2 = Follow.builder()
+                .followerId(2L)
+                .followingId(1L)
+                .build();
+        Follow follow3 = Follow.builder()
+                .followerId(3L)
+                .followingId(2L)
+                .build();
+        followRepository.save(follow);
+        followRepository.save(follow2);
+        followRepository.save(follow3);
 
     }
 }

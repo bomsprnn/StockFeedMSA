@@ -27,9 +27,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final CommentLikeRepository commentLikeRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final UserServiceClient userServiceClient;
     private final JWTParseService jwtParseService;
+    private final NewsFeedService newsFeedService;
 
     // 게시글 생성
     public void createPost(HttpServletRequest request, CreatePostDto createPostDto) {
@@ -42,7 +42,7 @@ public class PostService {
                 .viewCount(0)
                 .build();
         postRepository.save(post);
-        //applicationEventPublisher.publishEvent(new PostEvent(this, post, PostEvent.EventType.CREATE));
+        newsFeedService.createPostonNewsFeed(userId, post.getUserId(), post.getId());
     }
 
     // 게시글 수정
