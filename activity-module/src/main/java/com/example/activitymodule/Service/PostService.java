@@ -57,15 +57,18 @@ public class PostService {
     // 게시글 삭제
     public void deletePost(HttpServletRequest request, Long postId) {
         Long userId = jwtParseService.getUserIdFromToken(request);
+        log.info("userId: {}", userId);
         Post post = checkAndGetPost(userId, postId);
+
         postRepository.delete(post);
         newsFeedService.deletePostonNewsFeed(post.getUserId(), post.getId());
     }
 
     // 게시글 조회및 권한 체크
-    private Post checkAndGetPost(Long postId, Long userId) {
+    private Post checkAndGetPost(Long userId, Long postId) {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new IllegalArgumentException("해당 게시글이 존재하지 않습니다."));
+        log.info("post.getUserId(): {}", post.getUserId());
         if (!post.getUserId().equals(userId)) {
             throw new IllegalArgumentException("게시글 작성자에게만 권한이 있습니다.");
         }

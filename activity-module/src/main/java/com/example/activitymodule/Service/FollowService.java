@@ -18,8 +18,8 @@ import java.util.List;
 @Slf4j
 public class FollowService {
     private final FollowRepository followRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
     private final JWTParseService jwtParseService;
+    private final NewsFeedService newsFeedService;
 
     // 팔로우
     public void follow(Long followeeId, HttpServletRequest request) {
@@ -36,7 +36,7 @@ public class FollowService {
                 .followingId(followeeId)
                 .build();
         followRepository.save(follow);
-        //applicationEventPublisher.publishEvent(new FollowEvent(this, follow, followerId, followingId, FollowEvent.EventType.FOLLOW));
+        newsFeedService.createFollowonNewsFeed(followerId, followeeId);
     }
 
     // 언팔로우
@@ -50,7 +50,7 @@ public class FollowService {
         }
 
         followRepository.deleteByFollowerIdAndFollowingId(unfollowerId, unfolloweeId);
-        //applicationEventPublisher.publishEvent(new FollowEvent(this, null, followerId, followingId, FollowEvent.EventType.UNFOLLOW));
+        newsFeedService.deleteFollowonNewsFeed(unfollowerId, unfolloweeId);
     }
 
     // 팔로우 여부 확인

@@ -43,7 +43,7 @@ public class NewsFeedService {
         });
     }
 
-    public void createCommentonNewsFeed(Long userId, Long ownerId, Long commentId) {
+    public void createCommentonNewsFeed(Long ownerId, Long commentId) {
         List<Long> followers = followRepository.findByFollowingId(ownerId)
                 .stream().map(follow -> follow.getFollowerId()).collect(Collectors.toList());
         // 댓글 생성자의 팔로워들 리스트
@@ -56,7 +56,7 @@ public class NewsFeedService {
         });
     }
 
-    public void createFollowonNewsFeed(Long userId, Long ownerId, Long followUserId) {
+    public void createFollowonNewsFeed(Long ownerId, Long followUserId) {
         List<Long> followers = followRepository.findByFollowingId(ownerId)
                 .stream().map(follow -> follow.getFollowerId()).collect(Collectors.toList());
         // 팔로우 생성자의 팔로워들 리스트
@@ -69,7 +69,7 @@ public class NewsFeedService {
         });
     }
 
-    public void createCommentLikeonNewsFeed(Long userId, Long ownerId, Long commentId) {
+    public void createCommentLikeonNewsFeed( Long ownerId, Long commentId) {
         List<Long> followers = followRepository.findByFollowingId(ownerId)
                 .stream().map(follow -> follow.getFollowerId()).collect(Collectors.toList());
         // 댓글 좋아요 생성자의 팔로워들 리스트

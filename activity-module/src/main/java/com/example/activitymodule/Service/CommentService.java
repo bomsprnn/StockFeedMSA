@@ -20,7 +20,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final PostService postService;
     private final CommentLikeRepository commentLikeRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final NewsFeedService newsFeedService;
     private final JWTParseService jwtParseService;
 
     // 댓글 생성
@@ -32,8 +32,7 @@ public class CommentService {
                 .post(postService.getPostById(createCommentDto.getPostId()))
                 .build();
         commentRepository.save(comment);
-        //applicationEventPublisher.publishEvent(new CommentEvent(this, comment, CommentEvent.EventType.CREATE));
-
+        newsFeedService.createCommentonNewsFeed(userId, comment.getId());
     }
 
     // 댓글 삭제
@@ -46,7 +45,7 @@ public class CommentService {
             throw new IllegalArgumentException("해당 댓글을 삭제할 권한이 없습니다.");
         }
         commentRepository.delete(comment);
-        //applicationEventPublisher.publishEvent(new CommentEvent(this, comment, CommentEvent.EventType.DELETE));
+        newsFeedService.deleteCommentonNewsFeed(comment.getUserId(), comment.getId());
     }
 
     // 댓글 좋아요
@@ -62,7 +61,7 @@ public class CommentService {
                 .comment(comment)
                 .build();
         commentLikeRepository.save(commentLike);
-        //applicationEventPublisher.publishEvent(new CommentLikeEvent(this, commentLike));
+        newsFeedService.createCommentLikeonNewsFeed(userId, comment.getId());
     }
 
 }

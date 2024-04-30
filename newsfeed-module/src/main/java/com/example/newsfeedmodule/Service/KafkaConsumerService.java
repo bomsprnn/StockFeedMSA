@@ -9,10 +9,12 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional
 public class KafkaConsumerService {
     private final ObjectMapper objectMapper;
     private final NewsFeedRepository newsFeedRepository;
@@ -42,14 +44,19 @@ public class KafkaConsumerService {
 
         if(newsFeedDto.getType().equals("POST")){
           newsFeedRepository.deleteByPostId(newsFeedDto.getPostId());
+          log.info("NewsFeed deleted: {}", newsFeedDto.getPostId());
         } else if(newsFeedDto.getType().equals("COMMENT")){
             newsFeedRepository.deleteByCommentId(newsFeedDto.getCommentId());
+            log.info("NewsFeed deleted: {}", newsFeedDto.getCommentId());
         } else if(newsFeedDto.getType().equals("FOLLOW")){
             newsFeedRepository.deleteByOwnUserIdAndFollowUserId(newsFeedDto.getOwnUserId(), newsFeedDto.getFollowUserId());
+            log.info("NewsFeed deleted: {}", newsFeedDto.getFollowUserId());
         } else if(newsFeedDto.getType().equals("POSTLIKE")){
             newsFeedRepository.deleteByOwnUserIdAndPostIdAndType(newsFeedDto.getOwnUserId(), newsFeedDto.getPostId(), NewsFeedType.valueOf("POSTLIKE"));
+            log.info("NewsFeed deleted: {}", newsFeedDto.getPostId());
         } else if(newsFeedDto.getType().equals("COMMENTLIKE")){
             newsFeedRepository.deleteByOwnUserIdAndCommentIdAndType(newsFeedDto.getOwnUserId(), newsFeedDto.getCommentId(), NewsFeedType.valueOf("COMMENTLIKE"));
+            log.info("NewsFeed deleted: {}", newsFeedDto.getCommentId());
         } else {
             log.error("Error processing message: {}", "Invalid Type");
         }
