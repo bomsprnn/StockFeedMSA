@@ -13,8 +13,8 @@ public class StockController {
     private final StockParseService stockParseService;
 
     @GetMapping("/stocks")
-    public Mono<String> getStocks(@RequestParam String symbol){
-        return stockParseService.parseStockData(symbol);
+    public void getStocks(@RequestParam String symbol){
+       stockParseService.parseAndSaveStockData(symbol);
     }
 
 }
