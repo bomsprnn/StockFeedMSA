@@ -1,10 +1,12 @@
 package com.example.stockmodule.Service;
 
+import com.example.stockmodule.Domain.Stock;
 import com.example.stockmodule.Domain.StockDetail;
 import com.example.stockmodule.Dto.Chartdata;
 import com.example.stockmodule.Dto.Item;
 import com.example.stockmodule.Dto.Protocol;
 import com.example.stockmodule.Repository.StockDetailRepository;
+import com.example.stockmodule.Repository.StockRepository;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,7 +17,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,11 +28,13 @@ import java.util.List;
 public class StockParseService {
     private final WebClient webClient;
     private final StockDetailRepository stockDetailRepository;
+    private final StockRepository stockRepository;
 
     @Autowired
-    public StockParseService(WebClient.Builder webClientBuilder, StockDetailRepository stockDetailRepository) {
+    public StockParseService(WebClient.Builder webClientBuilder, StockDetailRepository stockDetailRepository, StockRepository stockRepository) {
         this.webClient = webClientBuilder.baseUrl("https://fchart.stock.naver.com").build();
         this.stockDetailRepository = stockDetailRepository;
+        this.stockRepository = stockRepository;
     }
     public void parseAndSaveStockData(String symbol) {
         parseStockData(symbol).subscribe(xmlData -> {
@@ -49,7 +52,7 @@ public class StockParseService {
                 .uri(uriBuilder -> uriBuilder.path("/sise.nhn")
                         .queryParam("symbol", symbol)
                         .queryParam("timeframe", "day")
-                        .queryParam("count", "1250")
+                        .queryParam("count", "120")
                         .queryParam("requestType", "0")
                         .build())
                 .retrieve()
@@ -61,6 +64,8 @@ public class StockParseService {
         try {
             Protocol protocol = xmlMapper.readValue(xmlData, Protocol.class);
             Chartdata chartData = protocol.getChartdata();
+            String symbol = chartData.getSymbol();
+            //Stock stock = stockRepository.findBySymbol(symbol).orElse(Stock.builder().symbol(symbol).build());
             log.info("Chardata: {}", chartData);
             List<StockDetail> stockDetails = new ArrayList<>();
             for (Item item : chartData.getItems()) {
