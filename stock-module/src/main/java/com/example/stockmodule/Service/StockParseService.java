@@ -36,15 +36,20 @@ public class StockParseService {
         this.stockDetailRepository = stockDetailRepository;
         this.stockRepository = stockRepository;
     }
-    public void parseAndSaveStockData(String symbol) {
+    public void parseAllStockData() {
+        stockRepository.findAll().forEach(stock -> {
+            parseAndSaveStockData(stock.getSymbol(), stock);
+        });
+    }
+
+    public void parseAndSaveStockData(String symbol, Stock stock) {
         parseStockData(symbol).subscribe(xmlData -> {
             log.info("Stock data: {}", xmlData);
-            List<StockDetail> stockDetails = convertXmlToStockDetails(xmlData);
+            List<StockDetail> stockDetails = convertXmlToStockDetails(xmlData, stock);
 
             log.info("Stock details: {}", stockDetails);
-            // 여기에서는 예시로 stockDetails 리스트를 바로 저장하는 과정을 보입니다.
-            // 실제로는 Stock 엔티티를 처리하는 로직을 추가할 필요가 있습니다.
-            stockDetailRepository.saveAll(stockDetails); // 가정: 적절한 방법으로 저장
+
+            stockDetailRepository.saveAll(stockDetails);
         });
     }
     public Mono<String> parseStockData(String symbol) {
@@ -52,25 +57,22 @@ public class StockParseService {
                 .uri(uriBuilder -> uriBuilder.path("/sise.nhn")
                         .queryParam("symbol", symbol)
                         .queryParam("timeframe", "day")
-                        .queryParam("count", "120")
+                        .queryParam("count", "600")
                         .queryParam("requestType", "0")
                         .build())
                 .retrieve()
                 .bodyToMono(String.class);
     }
 
-    private List<StockDetail> convertXmlToStockDetails(String xmlData) {
+    private List<StockDetail> convertXmlToStockDetails(String xmlData, Stock stock) {
         XmlMapper xmlMapper = new XmlMapper();
         try {
             Protocol protocol = xmlMapper.readValue(xmlData, Protocol.class);
             Chartdata chartData = protocol.getChartdata();
-            String symbol = chartData.getSymbol();
-            //Stock stock = stockRepository.findBySymbol(symbol).orElse(Stock.builder().symbol(symbol).build());
             log.info("Chardata: {}", chartData);
             List<StockDetail> stockDetails = new ArrayList<>();
             for (Item item : chartData.getItems()) {
-                // Item 데이터에서 필요한 정보를 추출하고 StockDetail 객체를 생성하여 리스트에 추가
-                // 예: 'data' 필드 포맷 -> "날짜|시가|고가|저가|종가|거래량"
+
                 log.info("item: {}", item);
                 String[] parts = item.getData().split("\\|");
                 log.info("parts: {}", parts);
@@ -81,6 +83,7 @@ public class StockParseService {
                         .low(Long.valueOf(parts[3]))
                         .close(Long.valueOf(parts[4]))
                         .volume(Long.valueOf(parts[5]))
+                        .stock(stock)
                         .build();
                 log.info("Stock detail: {}", stockDetail);
                 stockDetails.add(stockDetail);

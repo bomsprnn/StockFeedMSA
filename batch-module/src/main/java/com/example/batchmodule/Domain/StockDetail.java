@@ -1,4 +1,4 @@
-package com.example.stockmodule.Domain;
+package com.example.batchmodule.Domain;
 
 import jakarta.persistence.*;
 import lombok.Builder;
@@ -25,6 +25,7 @@ public class StockDetail {
     private Long low;
     private Long close;
     private Long volume;
+
     @Builder
     public StockDetail(Stock stock, LocalDateTime date, Long open, Long high, Long low, Long close, Long volume){
         this.stock = stock;

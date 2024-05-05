@@ -15,11 +15,11 @@ public class StockController {
     private final StocksService stocksService;
 
     @GetMapping("/stocks")
-    public void getStocks(@RequestParam String symbol){
-       stockParseService.parseAndSaveStockData(symbol);
+    public void get5yearStocks(){
+       stockParseService.parseAllStockData();
     }
 
-    @GetMapping("/stock")
+    @GetMapping("/stock") //코스피, 코스닥 종목 데이터 가져오기
     public void getStock(){
         stocksService.fetchAndSaveStockData();
     }

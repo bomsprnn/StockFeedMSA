@@ -8,7 +8,6 @@ import com.example.stockmodule.Repository.StockRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
 import reactor.core.publisher.Flux;
 
@@ -32,13 +31,13 @@ public class StocksService {
     @PostConstruct
     public void fetchAndSaveStockData() {
         fetchAndSaveByMarket(KOSPIpath);
-       fetchAndSaveByMarket(KOSDAQpath);
+        fetchAndSaveByMarket(KOSDAQpath);
     }
 
     public void fetchAndSaveByMarket(String path) {
         Flux.range(1, Integer.MAX_VALUE)
-                .delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
-                .flatMap(page -> fetchStockData(page, path  ))
+                //.delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
+                .flatMap(page -> fetchStockData(page, path))
                 .takeUntil(stockList -> stockList.isEmpty())
                 .flatMap(Flux::fromIterable)
                 .map(this::convertToEntity)
@@ -46,10 +45,8 @@ public class StocksService {
                 .subscribe(this::saveUniqueStocks); // 변경된 부분
     }
 
-    //@Transactional
     public void saveUniqueStocks(List<Stock> stocks) {
         stocks.forEach(stock -> {
-            log.info("Method start: saveUniqueStocks by thread {}", Thread.currentThread().getName());
             boolean exists = stockRepository.findBySymbol(stock.getSymbol()).isPresent();
             if (!exists) {
                 stockRepository.save(stock);
