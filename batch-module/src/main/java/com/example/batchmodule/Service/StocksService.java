@@ -1,11 +1,11 @@
-package com.example.stockmodule.Service;
+package com.example.batchmodule.Service;
 
-import com.example.stockmodule.Domain.Stock;
-import com.example.stockmodule.Domain.StockMarket;
-import com.example.stockmodule.Dto.StockApiResponse;
-import com.example.stockmodule.Dto.StockDto;
-import com.example.stockmodule.Repository.StockRepository;
-import jakarta.annotation.PostConstruct;
+
+import com.example.batchmodule.Domain.Stock;
+import com.example.batchmodule.Domain.StockMarket;
+import com.example.batchmodule.Dto.StockApiResponse;
+import com.example.batchmodule.Dto.StockDto;
+import com.example.batchmodule.Repository.StockRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;

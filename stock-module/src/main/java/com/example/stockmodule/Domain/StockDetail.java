@@ -18,7 +18,6 @@ public class StockDetail {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id")
     private Stock stock;
-    @Column(unique = true)
     private LocalDateTime date;
     private Long open;
     private Long high;

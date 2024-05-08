@@ -1,12 +1,12 @@
-package com.example.stockmodule.Service;
+package com.example.batchmodule.Service;
 
-import com.example.stockmodule.Domain.Stock;
-import com.example.stockmodule.Domain.StockDetail;
-import com.example.stockmodule.Dto.Chartdata;
-import com.example.stockmodule.Dto.Item;
-import com.example.stockmodule.Dto.Protocol;
-import com.example.stockmodule.Repository.StockDetailRepository;
-import com.example.stockmodule.Repository.StockRepository;
+import com.example.batchmodule.Domain.Stock;
+import com.example.batchmodule.Domain.StockDetail;
+import com.example.batchmodule.Dto.Chartdata;
+import com.example.batchmodule.Dto.Item;
+import com.example.batchmodule.Dto.Protocol;
+import com.example.batchmodule.Repository.StockDetailRepository;
+import com.example.batchmodule.Repository.StockRepository;
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
@@ -37,23 +38,15 @@ public class StockParseService {
         this.stockDetailRepository = stockDetailRepository;
         this.stockRepository = stockRepository;
     }
-    public void parseAllStockData() {
-        stockRepository.findAll().forEach(stock -> {
-            parseAndSaveStockData(stock.getSymbol(), stock);
-        });
+
+    public Flux<StockDetail> getStockDetailList(String symbol, Stock stock) {
+        return parseStockData(symbol)
+                .flatMapMany(xmlData -> {
+                    log.info("Stock data: {}", xmlData);
+                    return Flux.fromIterable(convertXmlToStockDetails(xmlData, stock));
+                });
     }
 
-
-    public void parseAndSaveStockData(String symbol, Stock stock) {
-        parseStockData(symbol).subscribe(xmlData -> {
-            log.info("Stock data: {}", xmlData);
-            List<StockDetail> stockDetails = convertXmlToStockDetails(xmlData, stock);
-
-            log.info("Stock details: {}", stockDetails);
-
-            stockDetailRepository.saveAll(stockDetails);
-        });
-    }
     public Mono<String> parseStockData(String symbol) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/sise.nhn")
