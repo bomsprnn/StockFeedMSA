@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 @StepScope
@@ -27,7 +28,12 @@ public class StockDetailWriter implements ItemWriter<List<StockDetail>> {
         List<? extends List<StockDetail>> items = chunk.getItems();
         List<StockDetail> list = new ArrayList<>();
         items.forEach(list::addAll);
+
+        List<StockDetail> filteredList = list.stream()
+                .filter(stockDetail -> !stockDetailRepository.existsBySymbolAndDate(stockDetail.getSymbol(), stockDetail.getDate()))
+                .collect(Collectors.toList()); // 중복되지 않는 항목만 필터링
+
         log.info("chunk size ={}",list.size());
-        stockDetailRepository.saveAll(list);
+        stockDetailRepository.saveAll(filteredList);
     }
 }

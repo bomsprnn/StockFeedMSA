@@ -14,9 +14,7 @@ public class StockDetail {
 
     @Id @GeneratedValue
     private Long id;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stock_id")
-    private Stock stock;
+    private String symbol;
     private LocalDateTime date;
     private Long open;
     private Long high;
@@ -25,8 +23,8 @@ public class StockDetail {
     private Long volume;
 
     @Builder
-    public StockDetail(Stock stock, LocalDateTime date, Long open, Long high, Long low, Long close, Long volume){
-        this.stock = stock;
+    public StockDetail(String symbol, LocalDateTime date, Long open, Long high, Long low, Long close, Long volume){
+        this.symbol = symbol;
         this.date = date;
         this.open = open;
         this.high = high;

@@ -30,36 +30,48 @@ public class StockParseService {
     private final WebClient webClient;
     private final StockDetailRepository stockDetailRepository;
     private final StockRepository stockRepository;
+    private final RedisLockService redisLockService;
 
 
     @Autowired
-    public StockParseService(WebClient.Builder webClientBuilder, StockDetailRepository stockDetailRepository, StockRepository stockRepository) {
+    public StockParseService(WebClient.Builder webClientBuilder, StockDetailRepository stockDetailRepository, StockRepository stockRepository, RedisLockService redisLockService) {
         this.webClient = webClientBuilder.baseUrl("https://fchart.stock.naver.com").build();
         this.stockDetailRepository = stockDetailRepository;
         this.stockRepository = stockRepository;
+        this.redisLockService = redisLockService;
     }
 
-    public Flux<StockDetail> getStockDetailList(String symbol, Stock stock) {
-        return parseStockData(symbol)
-                .flatMapMany(xmlData -> {
-                    log.info("Stock data: {}", xmlData);
-                    return Flux.fromIterable(convertXmlToStockDetails(xmlData, stock));
-                });
+    public Flux<StockDetail> getStockDetailList(String symbol, String count) {
+        String lockKey = "lock:stock:" + symbol;
+        try {
+            boolean lockAcquired = redisLockService.lock(lockKey);
+            if (!lockAcquired) {
+                log.info("Failed to acquire lock for symbol: {}", symbol);
+                return Flux.empty();
+            }
+            return parseStockData(symbol, count)
+                    .flatMapMany(xmlData -> {
+                        log.info("Stock data: {}", xmlData);
+                        return Flux.fromIterable(convertXmlToStockDetails(xmlData, symbol));
+                    });
+        } finally {
+            redisLockService.unlock(lockKey);
+        }
     }
 
-    public Mono<String> parseStockData(String symbol) {
+    public Mono<String> parseStockData(String symbol, String count) {
         return webClient.get()
                 .uri(uriBuilder -> uriBuilder.path("/sise.nhn")
                         .queryParam("symbol", symbol) // 종목 코드
                         .queryParam("timeframe", "day") // 일봉 데이터
-                        .queryParam("count", "990")  // 5년치 데이터 약 990개
+                        .queryParam("count", count)  // 5년치 데이터 약 990개
                         .queryParam("requestType", "0")
                         .build())
                 .retrieve()
                 .bodyToMono(String.class);
     }
 
-    private List<StockDetail> convertXmlToStockDetails(String xmlData, Stock stock) {
+    private List<StockDetail> convertXmlToStockDetails(String xmlData, String symbol) {
         XmlMapper xmlMapper = new XmlMapper();
         try {
             Protocol protocol = xmlMapper.readValue(xmlData, Protocol.class);
@@ -78,7 +90,7 @@ public class StockParseService {
                         .low(Long.valueOf(parts[3]))
                         .close(Long.valueOf(parts[4]))
                         .volume(Long.valueOf(parts[5]))
-                        .stock(stock)
+                        .symbol(symbol)
                         .build();
                 log.info("Stock detail: {}", stockDetail);
                 stockDetails.add(stockDetail);
@@ -89,4 +101,5 @@ public class StockParseService {
             return new ArrayList<>();
         }
     }
+
 }

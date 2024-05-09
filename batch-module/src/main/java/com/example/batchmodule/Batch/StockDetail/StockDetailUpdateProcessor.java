@@ -13,13 +13,14 @@ import java.util.List;
 @Component
 @RequiredArgsConstructor
 @StepScope
-public class StockDetailProcessor implements ItemProcessor<Stock, List<StockDetail>> {
+public class StockDetailUpdateProcessor implements ItemProcessor<Stock, List<StockDetail>> {
     private final StockParseService stockParseService;
     @Override
     public List<StockDetail> process(Stock stock) throws Exception {
-        List<StockDetail> stockDetails = stockParseService.getStockDetailList(stock.getSymbol(), "990")
+        List<StockDetail> stockDetails = stockParseService.getStockDetailList(stock.getSymbol(), "1")
                 .collectList()
                 .block();
+
         return stockDetails;
     }
 }

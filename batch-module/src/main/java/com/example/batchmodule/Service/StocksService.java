@@ -28,15 +28,19 @@ public class StocksService {
         this.stockRepository = stockRepository;
     }
 
+    public void deleteAllStocks() {
+        stockRepository.deleteAll();
+    }
+
     //@PostConstruct
-    public void fetchAndSaveStockData() {
+    public void fetchStockDatas() {
         fetchAndSaveByMarket(KOSPIpath);
         fetchAndSaveByMarket(KOSDAQpath);
     }
 
     public void fetchAndSaveByMarket(String path) {
         Flux.range(1, Integer.MAX_VALUE)
-                .delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
+                //.delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
                 .flatMap(page -> fetchStockData(page, path))
                 .takeUntil(stockList -> stockList.isEmpty())
                 .flatMap(Flux::fromIterable)
@@ -44,6 +48,29 @@ public class StocksService {
                 .collectList()
                 .subscribe(this::saveUniqueStocks); // 변경된 부분
     }
+
+    public Flux<Stock> fetchByMarket(String path) {
+        return Flux.range(1, Integer.MAX_VALUE)
+                .delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
+                .flatMap(page -> fetchStockData(page, path))
+                .takeUntil(stockList -> stockList.isEmpty())
+                .flatMap(Flux::fromIterable)
+                .map(this::convertToEntity);
+    }
+    public List<Stock> stockdatas() {
+        stockRepository.deleteAllStocks();
+
+        List<Stock> stocks = fetchByMarket(KOSPIpath)
+                .collectList()
+                .block();
+        List<Stock> kosdaq = fetchByMarket(KOSDAQpath)
+                .collectList()
+                .block();
+
+        stocks.addAll(kosdaq);
+        return stocks;
+    }
+
 
     public void saveUniqueStocks(List<Stock> stocks) {
         stocks.forEach(stock -> {
