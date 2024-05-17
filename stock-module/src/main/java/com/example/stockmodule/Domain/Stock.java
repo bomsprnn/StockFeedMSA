@@ -21,6 +21,8 @@ public class Stock {
     private Double rate; // 등락률
     private Long price; // 현재가
 
+
+
     @Builder
     public Stock(String symbol, String name, StockMarket market, Double rate, Long price){
         this.symbol = symbol;

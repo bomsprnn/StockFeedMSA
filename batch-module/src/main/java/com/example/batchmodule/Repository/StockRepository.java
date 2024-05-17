@@ -18,4 +18,6 @@ public interface StockRepository extends JpaRepository<Stock, Long> {
     @Query("DELETE FROM Stock")
     void deleteAllStocks();
 
+
+
 }

@@ -2,6 +2,7 @@ package com.example.batchmodule.Batch.StockDetail;
 
 import com.example.batchmodule.Domain.Stock;
 import com.example.batchmodule.Domain.StockDetail;
+import com.example.batchmodule.Service.KafkaStockProducer;
 import com.example.batchmodule.Service.StockParseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.batch.core.configuration.annotation.StepScope;

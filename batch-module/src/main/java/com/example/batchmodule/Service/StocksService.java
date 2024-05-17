@@ -20,6 +20,7 @@ public class StocksService {
     private final WebClient webClient;
     private final StockRepository stockRepository;
 
+
     private static final String KOSPIpath = "/api/stocks/marketValue/KOSPI";
     private static final String KOSDAQpath = "/api/stocks/marketValue/KOSDAQ";
 
@@ -37,7 +38,7 @@ public class StocksService {
         fetchAndSaveByMarket(KOSPIpath);
         fetchAndSaveByMarket(KOSDAQpath);
     }
-
+//
     public void fetchAndSaveByMarket(String path) {
         Flux.range(1, Integer.MAX_VALUE)
                 //.delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
@@ -51,15 +52,20 @@ public class StocksService {
 
     public Flux<Stock> fetchByMarket(String path) {
         return Flux.range(1, Integer.MAX_VALUE)
-                .delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
-                .flatMap(page -> fetchStockData(page, path))
+                //.delayElements(Duration.ofSeconds(1)) // 1초 딜레이 추가
+                .flatMap(page -> fetchStockData(page, path),5)
                 .takeUntil(stockList -> stockList.isEmpty())
                 .flatMap(Flux::fromIterable)
-                .map(this::convertToEntity);
+                .map(this::convertToEntity)
+                .onBackpressureDrop(stock -> log.warn("Dropping stock: {}", stock))
+                .doOnNext(stock -> log.debug("Processing stock: {}", stock))
+                .doOnError(error -> log.error("Error encountered: ", error));
+
     }
     public List<Stock> stockdatas() {
         stockRepository.deleteAllStocks();
 
+        log.info("Method 시작: {} by thread {}", System.currentTimeMillis(), Thread.currentThread().getName());
         List<Stock> stocks = fetchByMarket(KOSPIpath)
                 .collectList()
                 .block();
@@ -68,6 +74,8 @@ public class StocksService {
                 .block();
 
         stocks.addAll(kosdaq);
+        log.info("Method 종료: {} by thread {}", System.currentTimeMillis(), Thread.currentThread().getName() );
+
         return stocks;
     }
 

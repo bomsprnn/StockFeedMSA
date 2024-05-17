@@ -1,22 +1,14 @@
-package com.example.stockmodule.Domain;
+package com.example.batchmodule.Dto;
 
-import jakarta.persistence.*;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 
-@Entity
-@Getter
-@NoArgsConstructor
-public class StockDetail {
-
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+@Getter @Setter
+public class StockDetailDto {
     private String symbol;
-    @Column(name = "date")
-
     private LocalDateTime date;
     private Long open;
     private Long high;
@@ -25,7 +17,7 @@ public class StockDetail {
     private Long volume;
 
     @Builder
-    public StockDetail(String symbol, LocalDateTime date, Long open, Long high, Long low, Long close, Long volume){
+    public StockDetailDto(String symbol, LocalDateTime date, Long open, Long high, Long low, Long close, Long volume){
         this.symbol = symbol;
         this.date = date;
         this.open = open;
