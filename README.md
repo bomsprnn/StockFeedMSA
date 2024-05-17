@@ -26,10 +26,14 @@
 
 ### 설계
 ***
-- 아키텍쳐
+**아키텍쳐** 
+
   ![Architecture](https://velog.velcdn.com/images/oat/post/ffa8331d-2a96-45df-bc01-5d65a0d4ec81/image.jpg)
 
-- ERD
+<br/>
+
+**ERD**
+
   ![ERD](https://velog.velcdn.com/images/oat/post/5c9d8118-2b53-49e3-ad53-d7e7c4a3cbb3/image.png)
 
 <br/>
