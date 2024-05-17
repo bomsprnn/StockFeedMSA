@@ -40,12 +40,16 @@
 
 ### 트러블 슈팅
 ***
-- batchUpdate를 사용하여 대용량 데이터 저장 성능 향상
+- [batchUpdate](https://oatt.notion.site/readme-9214cc1ec87b4b79a9d7e594045276e6?pvs=4)를 사용하여 대용량 데이터 저장 성능 향상
 - 데이터 중복 저장 문제 해결을 위한 Redis 분산 Lock 도입
--
+- 주식 데이터 fetch 시 flatMap을 사용하여 백프레셔 관리
 
 
 <br/>
+
+### 개발기간
+***
+- 2024.04 ~
 
 <br/>
 

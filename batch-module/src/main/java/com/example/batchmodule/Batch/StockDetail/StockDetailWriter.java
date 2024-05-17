@@ -38,18 +38,17 @@ public class StockDetailWriter implements ItemWriter<List<StockDetail>> {
         List<StockDetail> list = new ArrayList<>();
         items.forEach(list::addAll);
 
-//        List<StockDetail> filteredList = list.stream()
-//                .filter(stockDetail -> !stockDetailRepository.existsBySymbolAndDate(stockDetail.getSymbol(), stockDetail.getDate()))
-//                .collect(Collectors.toList()); // 중복되지 않는 항목만 필터링
-////
+        List<StockDetail> filteredList = list.stream()
+                .filter(stockDetail -> !stockDetailRepository.existsBySymbolAndDate(stockDetail.getSymbol(), stockDetail.getDate()))
+                .collect(Collectors.toList()); // 중복되지 않는 항목만 필터링
+
 
         //log.info("chunk size ={}",list.size());
 
-       stockBulkSaveRepository.saveAll(list);
-       //log.info("stockDetailRepository.saveAll(list) 완료, list size = {}", list.size());
+        stockBulkSaveRepository.saveAll(list);
 
         //stockDetailRepository.saveAll(list);
-       // kafkaStockProducer.sendStockUpdateMessage(filteredList);
+        kafkaStockProducer.sendStockUpdateMessage(filteredList);
 
     }
 
