@@ -46,8 +46,8 @@
 
 ***
 **아키텍쳐**
+![mas_diagram](..%2F..%2FDownloads%2Fmas_diagram.png)
 
-![mas_diagram.drawio.png](..%2F..%2FDownloads%2Fmas_diagram.drawio.png)
 <br/>
 
 **ERD**
