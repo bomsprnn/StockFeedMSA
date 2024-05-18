@@ -5,6 +5,16 @@
 
 <br/>
 
+### 기술스택
+***
+- SpringBoot 3.2.x / JAVA 21
+- Mysql 8.0
+- Redis
+- Kafka
+- Docker
+
+<br/>
+
 ### 주요기능
 ***
 
@@ -28,8 +38,7 @@
 ***
 **아키텍쳐** 
 
-  ![Architecture](https://velog.velcdn.com/images/oat/post/ffa8331d-2a96-45df-bc01-5d65a0d4ec81/image.jpg)
-
+  ![stockMSA_diagram.jpg](..%2F..%2FDownloads%2FstockMSA_diagram.jpg)
 <br/>
 
 **ERD**
@@ -40,9 +49,9 @@
 
 ### 트러블 슈팅
 ***
-- [batchUpdate](https://oatt.notion.site/readme-9214cc1ec87b4b79a9d7e594045276e6?pvs=4)를 사용하여 대용량 데이터 저장 성능 향상
-- 데이터 중복 저장 문제 해결을 위한 Redis 분산 Lock 도입
-- 주식 데이터 fetch 시 flatMap을 사용하여 백프레셔 관리
+- [batchUpdate](https://oatt.notion.site/batchUpdate-348b56077e5f4b57b22008f30200b93a?pvs=4)를 사용하여 대용량 데이터 저장 성능 향상
+- 데이터 중복 저장 문제 해결을 위한 [Redis 분산 Lock](https://oatt.notion.site/Redis-Lock-32bca39d0ee647338b5bf3905a9155c5?pvs=4) 도입
+- 주식 데이터 fetch 시 [flatMap](https://oatt.notion.site/fetch-flatMap-9214cc1ec87b4b79a9d7e594045276e6?pvs=4)을 사용하여 백프레셔 관리
 
 
 <br/>

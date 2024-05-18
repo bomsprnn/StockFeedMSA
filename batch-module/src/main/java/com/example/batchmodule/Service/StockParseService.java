@@ -48,7 +48,7 @@ public class StockParseService {
         try {
             boolean lockAcquired = redisLockService.lock(lockKey);
             if (!lockAcquired) {
-                log.info("Failed to acquire lock for symbol: {}", symbol);
+                log.info("락 획득 실패 !! 종목 코드: {}", symbol);
                 return Flux.empty();
             }
             return parseStockData(symbol, count)
