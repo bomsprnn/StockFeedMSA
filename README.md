@@ -46,8 +46,8 @@
 
 ***
 **아키텍쳐**
-![mas_diagram](..%2F..%2FDownloads%2Fmas_diagram.png)
 
+![architecture](https://velog.velcdn.com/images/oat/post/9cb4d614-89db-4a74-bf71-4c4ebf60478e/image.png)
 <br/>
 
 **ERD**
