@@ -1,6 +1,7 @@
 package com.example.batchmodule.Service;
 
-import lombok.RequiredArgsConstructor;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -13,23 +14,25 @@ public class RedisLockService {
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
 
+    @Autowired
+    private RedissonClient redissonClient;
+
     public boolean lock(String key) {
-        int retry = 0;
-        while(retry< 3) {
-            if (redisTemplate.opsForValue().setIfAbsent(key, "locked", 10, TimeUnit.SECONDS)) {
-                return true;
-            }
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                return false;
-            }
+        RLock lock = redissonClient.getLock(key);
+        try {
+            // 락 획득 시도
+            // 10초 동안 락을 획득하지 못하면 실패
+            return lock.tryLock(0, 10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            return false;
         }
-        return false;
     }
 
     public void unlock(String key) {
-        redisTemplate.delete(key);
+        RLock lock = redissonClient.getLock(key);
+        if (lock.isHeldByCurrentThread()) {
+            lock.unlock();
+        }
     }
 }

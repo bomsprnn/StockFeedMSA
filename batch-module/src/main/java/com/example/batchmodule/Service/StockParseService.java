@@ -32,7 +32,6 @@ public class StockParseService {
     private final StockRepository stockRepository;
     private final RedisLockService redisLockService;
 
-
     @Autowired
     public StockParseService(WebClient.Builder webClientBuilder, StockDetailRepository stockDetailRepository, StockRepository stockRepository, RedisLockService redisLockService) {
         this.webClient = webClientBuilder.baseUrl("https://fchart.stock.naver.com").build();
@@ -42,8 +41,6 @@ public class StockParseService {
     }
 
     public Flux<StockDetail> getStockDetailList(String symbol, String count) {
-       //stockDetailRepository.deleteRecentStocks();
-
         String lockKey = "lock:stock:" + symbol;
         try {
             boolean lockAcquired = redisLockService.lock(lockKey);
@@ -52,10 +49,7 @@ public class StockParseService {
                 return Flux.empty();
             }
             return parseStockData(symbol, count)
-                    .flatMapMany(xmlData -> {
-                        //log.info("Stock data: {}", xmlData);
-                        return Flux.fromIterable(convertXmlToStockDetails(xmlData, symbol));
-                    });
+                    .flatMapMany(xmlData -> Flux.fromIterable(convertXmlToStockDetails(xmlData, symbol)));
         } finally {
             redisLockService.unlock(lockKey);
         }
@@ -78,13 +72,9 @@ public class StockParseService {
         try {
             Protocol protocol = xmlMapper.readValue(xmlData, Protocol.class);
             Chartdata chartData = protocol.getChartdata();
-           // log.info("Chardata: {}", chartData);
             List<StockDetail> stockDetails = new ArrayList<>();
             for (Item item : chartData.getItems()) {
-
-                //log.info("item: {}", item);
                 String[] parts = item.getData().split("\\|");
-                //log.info("parts: {}", parts);
                 StockDetail stockDetail = StockDetail.builder()
                         .date(LocalDate.parse(parts[0], DateTimeFormatter.ofPattern("yyyyMMdd")).atStartOfDay())
                         .open(Long.valueOf(parts[1]))
@@ -94,7 +84,6 @@ public class StockParseService {
                         .volume(Long.valueOf(parts[5]))
                         .symbol(symbol)
                         .build();
-                //log.info("Stock detail: {}", stockDetail);
                 stockDetails.add(stockDetail);
             }
             return stockDetails;
@@ -103,5 +92,4 @@ public class StockParseService {
             return new ArrayList<>();
         }
     }
-
 }
