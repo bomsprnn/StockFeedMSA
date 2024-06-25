@@ -1,5 +1,6 @@
 package com.example.batchmodule.Service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.concurrent.TimeUnit;
 
 @Service
+@Slf4j
 public class RedisLockService {
 
     @Autowired
@@ -33,6 +35,8 @@ public class RedisLockService {
         RLock lock = redissonClient.getLock(key);
         if (lock.isHeldByCurrentThread()) {
             lock.unlock();
+        }else {
+            log.warn("현재 쓰레드가 락을 가지고 있지 않습니다.");
         }
     }
 }
