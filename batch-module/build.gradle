@@ -33,12 +33,14 @@ dependencies {
     //redis
     implementation'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.redisson:redisson:3.27.2'
 
     implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.12.3'
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
 }
+
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:2023.0.1"
